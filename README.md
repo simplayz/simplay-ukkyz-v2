@@ -702,7 +702,9 @@ simplay-ukkyz-v2/
 
 | File | What it is |
 | --- | --- |
-| `README.md` | This document — full architecture and code analysis |
+| `AGENTS.md` | **Agent orientation** — invariants, file map with line counts and exports, recipes, known traps. ~3.3k tokens; designed to replace exploration of the source tree |
+| `llms.txt` | Machine-readable index in the [llms.txt](https://llmstxt.org) convention |
+| `README.md` | This document — full architecture and code analysis (~14k tokens; prefer `AGENTS.md` for task work) |
 | `docs/Simplayz-Project-Deck.pptx` | 19-slide analysis deck (16:9, speaker notes on every slide) |
 | `docs/assets/*.png` | Figures used by the README and the deck |
 | `docs/figures/extract.ts` | Runs `src/engine/*` and emits the raw data behind every figure |
