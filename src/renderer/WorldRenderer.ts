@@ -13,6 +13,7 @@ import {
   type WorldPoint,
 } from "@/engine/geodesy";
 import { heightAtM, sampleTerrain, type Biome } from "@/engine/terrain";
+import { api } from "@/lib/routes";
 import type { ParcelDTO, StructureDTO } from "@/lib/types";
 
 export const RELIEF_SCALE = 1.35;
@@ -270,7 +271,7 @@ export class WorldRenderer {
         this.rasterMaterials.push(rasterMaterial);
         this.rasterGroup.add(raster);
         new THREE.TextureLoader().load(
-          `/api/tiles/${tile.z}/${tile.x}/${tile.y}.png`,
+          api.tile(tile.z, tile.x, tile.y),
           (texture) => {
             if (this.disposed) { texture.dispose(); return; }
             texture.colorSpace = THREE.SRGBColorSpace;

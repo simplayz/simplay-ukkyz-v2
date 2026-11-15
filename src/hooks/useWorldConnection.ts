@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchSnapshot } from "@/lib/client";
+import { api } from "@/lib/routes";
 import type { EventDTO } from "@/lib/types";
 import { useWorldStore } from "@/store/useWorldStore";
 
@@ -43,7 +44,7 @@ export function useWorldConnection(pilotId: string | null) {
     const connect = (): void => {
       if (!active) return;
       source?.close();
-      source = new EventSource(`/api/stream?pilot=${encodeURIComponent(pilotId)}&after=${lastEvent.current}`);
+      source = new EventSource(api.stream(pilotId, lastEvent.current));
       source.addEventListener("ready", () => { if (active) setStreamStatus("live"); });
       source.addEventListener("world", (message) => {
         if (!active) return;

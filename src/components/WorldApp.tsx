@@ -10,6 +10,7 @@ import { lonLatToWorld, PARCEL_GRID_SIZE, seedForLocation } from "@/engine/geode
 import { STRUCTURE_CATALOGUE, getStructureDefinition, type StructureCategory, type StructureType } from "@/engine/catalogue";
 import { TICK_MS } from "@/engine/simulation";
 import { apiRequest, formatCountdown, formatNumber } from "@/lib/client";
+import { api, pages } from "@/lib/routes";
 import type { WorldSnapshot } from "@/lib/types";
 import { useWorldConnection } from "@/hooks/useWorldConnection";
 import { useWorldStore, type WorldLocation } from "@/store/useWorldStore";
@@ -88,7 +89,7 @@ export function WorldApp() {
   const register = async (): Promise<void> => {
     setBusy("register"); setFormError(null);
     try {
-      const next = await apiRequest<WorldSnapshot>("/api/pilots", { method: "POST", body: JSON.stringify({ callSign, lat: location.lat, lon: location.lon }) });
+      const next = await apiRequest<WorldSnapshot>(api.pilots(), { method: "POST", body: JSON.stringify({ callSign, lat: location.lat, lon: location.lon }) });
       setPilotId(next.pilot.id);
       setSnapshot(next);
       setRegistrationOpen(false);
@@ -101,7 +102,7 @@ export function WorldApp() {
     if (!pilotId) { setRegistrationOpen(true); return; }
     setBusy("claim"); setFormError(null);
     try {
-      const next = await apiRequest<WorldSnapshot>(`/api/pilots/${pilotId}/claim`, { method: "POST", body: JSON.stringify({ lat: location.lat, lon: location.lon }) });
+      const next = await apiRequest<WorldSnapshot>(api.pilotClaim(pilotId), { method: "POST", body: JSON.stringify({ lat: location.lat, lon: location.lon }) });
       setSnapshot(next);
       notify("Parcel surveyed and locked for 72 hours.", "success");
     } catch (error) { notify(error instanceof Error ? error.message : "Claim failed", "error"); }
@@ -113,7 +114,7 @@ export function WorldApp() {
     if (!selectedBuild || !pilotId || !snapshot?.parcel || busy) return;
     setBusy("build");
     try {
-      const next = await apiRequest<WorldSnapshot>(`/api/pilots/${pilotId}/structures`, { method: "POST", body: JSON.stringify({ type: selectedBuild, gx: cell.x, gy: cell.y, rotation: 0 }) });
+      const next = await apiRequest<WorldSnapshot>(api.pilotStructures(pilotId), { method: "POST", body: JSON.stringify({ type: selectedBuild, gx: cell.x, gy: cell.y, rotation: 0 }) });
       setSnapshot(next);
       notify(`${getStructureDefinition(selectedBuild).label} commissioned.`, "success");
     } catch (error) { notify(error instanceof Error ? error.message : "Build failed", "error"); }
@@ -124,7 +125,7 @@ export function WorldApp() {
     if (!selectedStructure || !pilotId) return;
     setBusy("salvage");
     try {
-      const next = await apiRequest<WorldSnapshot>(`/api/structures/${selectedStructure.id}?pilotId=${pilotId}`, { method: "DELETE" });
+      const next = await apiRequest<WorldSnapshot>(api.structure(selectedStructure.id, pilotId), { method: "DELETE" });
       setSnapshot(next); setSelectedStructureId(null); notify("Structure salvaged; 40% of base cost recovered.", "success");
     } catch (error) { notify(error instanceof Error ? error.message : "Salvage failed", "error"); }
     finally { setBusy(null); }
@@ -134,7 +135,7 @@ export function WorldApp() {
     if (!pilotId || !snapshot?.parcel) return;
     setBusy("assault");
     try {
-      const next = await apiRequest<WorldSnapshot>(`/api/parcels/${snapshot.parcel.id}/assault?pilotId=${pilotId}`, { method: "POST" });
+      const next = await apiRequest<WorldSnapshot>(api.parcelAssault(snapshot.parcel.id, pilotId), { method: "POST" });
       setSnapshot(next); notify("Four-phase assault resolved and archived.", "success");
     } catch (error) { notify(error instanceof Error ? error.message : "Assault failed", "error"); }
     finally { setBusy(null); }
@@ -177,7 +178,7 @@ export function WorldApp() {
                 <div className="score-list">
                   {scoreLabels.map((score) => <div className="score-row" key={score}><span>{score}</span><div className="score-track"><i style={{ width: `${snapshot.parcel!.scores[score] * 100}%` }} /></div><b className="mono">{Math.round(snapshot.parcel!.scores[score] * 100)}</b></div>)}
                 </div>
-                <Link className="button primary w-full mt-4" href={`/user/${snapshot.pilot.id}/area/${snapshot.parcel.id}`}>Open area plan<ArrowRight size={14} /></Link>
+                <Link className="button primary w-full mt-4" href={pages.area(snapshot.pilot.id, snapshot.parcel.id)}>Open area plan<ArrowRight size={14} /></Link>
               </div>
             ) : (
               <div className="glass-panel panel-pad">
@@ -217,7 +218,7 @@ export function WorldApp() {
                   <div className="metric"><span>Defence</span><strong>{snapshot.totals.defence}</strong></div>
                 </div>
                 <div className="p-3 flex gap-2">
-                  <Link href={`/user/${snapshot.pilot.id}/ai/management`} className="button flex-1"><Bot size={13} />3 AI officers</Link>
+                  <Link href={pages.aiManagement(snapshot.pilot.id)} className="button flex-1"><Bot size={13} />3 AI officers</Link>
                   {snapshot.parcel && <button className="button danger flex-1" disabled={!lockExpired || busy === "assault"} title={lockExpired ? "Resolve deterministic assault" : "Available after the 72-hour lock expires"} onClick={() => void assault()}><ShieldAlert size={13} />{busy === "assault" ? "Resolving" : "Assault"}</button>}
                 </div>
               </div>
@@ -246,7 +247,7 @@ export function WorldApp() {
                 <div className="panel-heading"><h3>{getStructureDefinition(selectedStructure.type).label}</h3><Pickaxe size={17} className="text-accent" /></div>
                 <p className="muted tiny">{getStructureDefinition(selectedStructure.type).description}</p>
                 <div className="hud-actions mt-3">
-                  {selectedBuilding && <Link className="button primary" href={`/user/${snapshot!.pilot.id}/area/${snapshot!.parcel!.id}/building/${selectedBuilding.id}`}>Interior plan<ArrowRight size={13} /></Link>}
+                  {selectedBuilding && <Link className="button primary" href={pages.building(snapshot!.pilot.id, snapshot!.parcel!.id, selectedBuilding.id)}>Interior plan<ArrowRight size={13} /></Link>}
                   <button className="button danger" disabled={busy === "salvage"} onClick={() => void salvage()}><Trash2 size={13} />Salvage</button>
                 </div>
               </div>

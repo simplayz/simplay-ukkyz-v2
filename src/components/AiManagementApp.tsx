@@ -6,6 +6,7 @@ import { ArrowLeft, Bot, BrainCircuit, Check, ChevronRight, Cpu, Radio, Save, Se
 import { AppHeader } from "./AppHeader";
 import { AI_MODELS, AI_PROVIDERS, BOT_ROLES, type AiProvider, type BotRole } from "@/engine/ai";
 import { apiRequest } from "@/lib/client";
+import { api, pages } from "@/lib/routes";
 import type { BotDTO, WorldSnapshot } from "@/lib/types";
 import { useWorldConnection } from "@/hooks/useWorldConnection";
 import { useWorldStore } from "@/store/useWorldStore";
@@ -60,12 +61,12 @@ export function AiManagementApp({ userId }: { userId: string }) {
   const [busyRole, setBusyRole] = useState<BotRole | null>(null);
   useEffect(() => { if (storedPilotId !== userId) setPilotId(userId); }, [storedPilotId, userId, setPilotId]);
   if (loading && !snapshot) return <><AppHeader active="ai" /><div className="loading-screen">Loading AI officers…</div></>;
-  if (!snapshot) return <><AppHeader pilotId={userId} active="ai" /><div className="empty-state">{error ?? "Pilot not found"}<div className="mt-4"><Link className="button" href="/">Return to world</Link></div></div></>;
+  if (!snapshot) return <><AppHeader pilotId={userId} active="ai" /><div className="empty-state">{error ?? "Pilot not found"}<div className="mt-4"><Link className="button" href={pages.world()}>Return to world</Link></div></div></>;
 
   const save = async (bot: BotDTO, draft: Draft): Promise<void> => {
     setBusyRole(bot.role);
     try {
-      const next = await apiRequest<WorldSnapshot>(`/api/pilots/${userId}/bots/${bot.id}`, { method: "PATCH", body: JSON.stringify(draft) });
+      const next = await apiRequest<WorldSnapshot>(api.pilotBot(userId, bot.id), { method: "PATCH", body: JSON.stringify(draft) });
       setSnapshot(next); notify(`${bot.role} ${bot.name} now uses ${draft.provider} / ${draft.model}.`, "success");
     } catch (caught) { notify(caught instanceof Error ? caught.message : "Could not save officer", "error"); }
     finally { setBusyRole(null); }
@@ -79,8 +80,8 @@ export function AiManagementApp({ userId }: { userId: string }) {
     <main className="page-shell">
       <AppHeader pilotId={userId} areaId={snapshot.parcel?.id} buildingId={snapshot.buildings[0]?.id} active="ai" />
       <div className="page-main">
-        <div className="breadcrumbs"><Link href="/"><ArrowLeft size={12} />World</Link><span>/</span><span>{snapshot.pilot.callSign}</span><span>/</span><span>AI management</span></div>
-        <div className="page-title"><div><div className="eyebrow">AI Management / persistent routing</div><h1>Command officers</h1><p>Assign a provider and model to each bot. Profiles are validated and stored in the world database.</p></div><Link className="button" href={snapshot.parcel ? `/user/${userId}/area/${snapshot.parcel.id}` : "/"}>Return to command<ChevronRight size={14} /></Link></div>
+        <div className="breadcrumbs"><Link href={pages.world()}><ArrowLeft size={12} />World</Link><span>/</span><span>{snapshot.pilot.callSign}</span><span>/</span><span>AI management</span></div>
+        <div className="page-title"><div><div className="eyebrow">AI Management / persistent routing</div><h1>Command officers</h1><p>Assign a provider and model to each bot. Profiles are validated and stored in the world database.</p></div><Link className="button" href={snapshot.parcel ? pages.area(userId, snapshot.parcel.id) : pages.world()}>Return to command<ChevronRight size={14} /></Link></div>
         <div className="metric-grid mb-4"><div className="metric"><span>Officers active</span><strong>{active} / 3</strong></div><div className="metric"><span>Providers assigned</span><strong>{providerCount}</strong></div><div className="metric"><span>Mean autonomy</span><strong>{averageAutonomy}%</strong></div></div>
         <div className="bot-grid">{sortedBots.map((bot) => <OfficerCard key={bot.id} bot={bot} snapshot={snapshot} onSave={save} busy={busyRole === bot.role} />)}</div>
         {sortedBots.length < 3 && <div className="error-text mt-4">This pilot predates complete officer seeding; {3 - sortedBots.length} role(s) are unavailable.</div>}
