@@ -1,0 +1,59 @@
+# Simplayz
+
+> A persistent world simulator. Pilots claim a 6.4 km × 6.4 km parcel at real
+> latitude/longitude; terrain is a pure function of (seed, x, y) with no heightmap
+> assets. Layers: economy on a 15 s lazy tick, 18 structures, 9 room types on a
+> 12 × 12 interior grid, deterministic 4-phase assaults, 3 AI officer routing
+> profiles. Next.js 16 App Router · React 19 · TypeScript strict · PostgreSQL +
+> Drizzle · three.js · Zustand · Tailwind 4. 48 source files · 3,852 lines.
+
+Start here: **[AGENTS.md](./AGENTS.md)** — invariants, file map with line counts
+and exports, recipes, known traps. It is written to replace exploration of the
+source tree (~58k tokens).
+
+Do not open: `README.md` (14.3k tokens, human-facing), `package-lock.json`,
+`docs/figures/data/*`.
+
+## Architected around
+
+- **Purity** — `src/engine/` imports no DB, Next, or React; runs standalone under tsx.
+- **Determinism** — zero `Math.random()` in the engine; terrain and assaults are seeded.
+- **Server authority** — every mutation re-validates ownership (SQL join on
+  `parcels.pilot_id`), terrain, footprint, staffing and credits inside transactions.
+- **One DTO** — `WorldSnapshot` (`src/lib/types.ts`) is the single state shape; every
+  response is the full refreshed snapshot.
+
+## Source
+
+- [AGENTS.md](./AGENTS.md): agent orientation — invariants, file map, recipes, traps
+- [src/engine/terrain.ts](./src/engine/terrain.ts): procedural field, 14 biomes, 64 × 64 parcel survey
+- [src/engine/geodesy.ts](./src/engine/geodesy.ts): Web Mercator ↔ metres ↔ slippy tiles
+- [src/engine/simulation.ts](./src/engine/simulation.ts): economy totals, lazy ticks, 4-phase assault
+- [src/engine/catalogue.ts](./src/engine/catalogue.ts): 18 structure definitions
+- [src/engine/rooms.ts](./src/engine/rooms.ts): 9 room kinds, AABB overlap, coverage model
+- [src/engine/ai.ts](./src/engine/ai.ts): 6 providers, 12 model profiles, 3 bot roles
+- [src/db/schema.ts](./src/db/schema.ts): 9 Drizzle tables + relations
+- [src/lib/types.ts](./src/lib/types.ts): all DTOs including WorldSnapshot
+- [src/server/world.ts](./src/server/world.ts): snapshot assembly, registration, claims
+- [src/app/api/](./src/app/api/): 12 route handlers
+- [src/components/](./src/components/): client components (WorldApp is the largest at 286 lines)
+- [src/renderer/](./src/renderer/): three.js world renderer (525 lines) and plan previews
+
+## Optional
+
+- [README.md](./README.md): full human analysis — architecture, engine maths, risk
+  register, roadmap. Expensive to read; prefer AGENTS.md.
+- [docs/figures/README.md](./docs/figures/README.md): reproducible figure pipeline
+  (`extract.ts` → `render.py` → `build_deck.py`) and deck slide map.
+- [src/engine/verify-terrain.ts](./src/engine/verify-terrain.ts): engine assertion
+  suite — determinism, finiteness, survey shape, relief range.
+
+## Commands
+
+    npm run dev          # next dev
+    npm run typecheck    # tsc --noEmit  (cheapest gate)
+    npm run lint
+    npm run build
+    npx tsx src/engine/verify-terrain.ts    # no DB required
+
+`DATABASE_URL` is required at runtime; `src/db/index.ts` throws without it.
