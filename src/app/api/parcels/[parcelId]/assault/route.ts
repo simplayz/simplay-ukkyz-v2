@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db";
-import { assaults, parcels, pilots } from "@/db/schema";
+import { databaseDriver, db, pgDb } from "@/db";
+import { assaults, parcels, pgSchema, pilots } from "@/db/schema";
 import { LOCK_MS, resolveAssault } from "@/engine/simulation";
 import { apiError } from "@/lib/api";
 import { getWorldSnapshot, publishEvent } from "@/server/world";
@@ -25,12 +25,22 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pa
       structureCount: snapshot.structures.length,
     });
     const now = new Date();
+    const nextLockedUntil = new Date(now.getTime() + LOCK_MS);
     const credits = Math.max(0, snapshot.pilot.credits + report.reward - report.loss);
-    await db.transaction(async (tx) => {
-      await tx.insert(assaults).values({ id: crypto.randomUUID(), parcelId, report });
-      await tx.update(pilots).set({ credits }).where(eq(pilots.id, pilotId));
-      await tx.update(parcels).set({ lockedUntil: new Date(now.getTime() + LOCK_MS), lastTickAt: now }).where(eq(parcels.id, parcelId));
-    });
+    const assaultId = crypto.randomUUID();
+    if (databaseDriver === "postgres") {
+      await pgDb!.transaction(async (tx) => {
+        await tx.insert(pgSchema.assaults).values({ id: assaultId, parcelId, report });
+        await tx.update(pgSchema.pilots).set({ credits }).where(eq(pgSchema.pilots.id, pilotId));
+        await tx.update(pgSchema.parcels).set({ lockedUntil: nextLockedUntil, lastTickAt: now }).where(eq(pgSchema.parcels.id, parcelId));
+      });
+    } else {
+      db.transaction((tx) => {
+        tx.insert(assaults).values({ id: assaultId, parcelId, report }).run();
+        tx.update(pilots).set({ credits }).where(eq(pilots.id, pilotId)).run();
+        tx.update(parcels).set({ lockedUntil: nextLockedUntil, lastTickAt: now }).where(eq(parcels.id, parcelId)).run();
+      });
+    }
     await publishEvent(pilotId, "assault", `${report.enemy}: ${report.victory ? `defence held, +${report.reward} credits` : `parcel overrun, −${report.loss} credits`}.`, { victory: report.victory });
     return NextResponse.json(await getWorldSnapshot(pilotId));
   } catch (error) {

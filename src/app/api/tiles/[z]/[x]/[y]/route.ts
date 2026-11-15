@@ -1,5 +1,5 @@
 import { and, eq } from "drizzle-orm";
-import { db } from "@/db";
+import { databaseDriver, db } from "@/db";
 import { tileCache } from "@/db/schema";
 import { placeholderPng } from "@/server/placeholder";
 
@@ -9,6 +9,9 @@ const FRESH_MS = 24 * 60 * 60 * 1000;
 
 function pngResponse(png: Buffer, source: string, ageSeconds: number, z: number, x: number, y: number): Response {
   const placeholder = source === "placeholder";
+  const cacheProvenance = databaseDriver === "postgres"
+    ? "PostgreSQL tile_cache / OpenStreetMap Standard"
+    : "SQLite tile_cache / OpenStreetMap Standard";
   return new Response(new Uint8Array(png), {
     status: 200,
     headers: {
@@ -17,7 +20,7 @@ function pngResponse(png: Buffer, source: string, ageSeconds: number, z: number,
       "Cache-Control": placeholder ? "no-store, max-age=0" : source === "stale" ? "public, max-age=60, stale-if-error=604800" : "public, max-age=86400, stale-if-error=604800",
       "x-simplayz-source": source,
       "x-simplayz-cache": source === "cache" ? "HIT" : source === "stale" ? "STALE" : "MISS",
-      "x-simplayz-provenance": source === "upstream" ? "OpenStreetMap Standard" : source === "placeholder" ? "Simplayz generated fallback; not cached" : "PostgreSQL tile_cache / OpenStreetMap Standard",
+      "x-simplayz-provenance": source === "upstream" ? "OpenStreetMap Standard" : source === "placeholder" ? "Simplayz generated fallback; not cached" : cacheProvenance,
       "x-simplayz-age": String(Math.max(0, Math.round(ageSeconds))),
       "x-simplayz-tile": `${z}/${x}/${y}`,
       "Access-Control-Expose-Headers": "x-simplayz-source,x-simplayz-cache,x-simplayz-provenance,x-simplayz-age,x-simplayz-tile",
@@ -53,8 +56,9 @@ export async function GET(_request: Request, context: { params: Promise<{ z: str
     const bytes = Buffer.from(await upstream.arrayBuffer());
     if (!contentType.includes("image") || bytes.length < 100 || bytes.subarray(1, 4).toString("ascii") !== "PNG") throw new Error("Upstream did not return a PNG");
     const encoded = bytes.toString("base64");
+    const fetchedAt = new Date();
     try {
-      await db.insert(tileCache).values({ z, x, y, pngBase64: encoded, fetchedAt: new Date(), source: "osm" }).onConflictDoUpdate({ target: [tileCache.z, tileCache.x, tileCache.y], set: { pngBase64: encoded, fetchedAt: new Date(), source: "osm" } });
+      await db.insert(tileCache).values({ z, x, y, pngBase64: encoded, fetchedAt, source: "osm" }).onConflictDoUpdate({ target: [tileCache.z, tileCache.x, tileCache.y], set: { pngBase64: encoded, fetchedAt, source: "osm" } });
     } catch {
       // A cache write failure must not prevent the freshly fetched raster from rendering.
     }
