@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { assaults, bots, buildings, events, parcels, pilots, rooms, structures } from "@/db/schema";
 import { BOT_DEFAULTS, BOT_ROLES } from "@/engine/ai";
@@ -24,9 +24,9 @@ export async function publishEvent(pilotId: string, kind: string, message: strin
 }
 
 export async function getWorldSnapshot(pilotId: string): Promise<WorldSnapshot | null> {
-  const pilot = await db.query.pilots.findFirst({ where: eq(pilots.id, pilotId) });
+  const pilot = await db.query.pilots.findFirst({ where: { id: pilotId } });
   if (!pilot) return null;
-  const parcel = await db.query.parcels.findFirst({ where: eq(parcels.pilotId, pilotId) });
+  const parcel = await db.query.parcels.findFirst({ where: { pilotId } });
   const placed = parcel ? await db.select().from(structures).where(eq(structures.parcelId, parcel.id)) : [];
   const zeroScores = { elevation: 0, slope: 0, water: 0, forest: 0, farm: 0, build: 0, defence: 0, hydro: 0 };
   const totals = computeTotals(placed, parcel?.scores ?? zeroScores);
@@ -132,9 +132,9 @@ export async function registerPilot(callSign: string, lat: number, lon: number, 
 }
 
 export async function claimParcel(pilotId: string, lat: number, lon: number): Promise<WorldSnapshot> {
-  const pilot = await db.query.pilots.findFirst({ where: eq(pilots.id, pilotId) });
+  const pilot = await db.query.pilots.findFirst({ where: { id: pilotId } });
   if (!pilot) throw new Error("Pilot not found");
-  const existing = await db.query.parcels.findFirst({ where: eq(parcels.pilotId, pilotId) });
+  const existing = await db.query.parcels.findFirst({ where: { pilotId } });
   if (existing) throw new Error("This pilot already holds a parcel");
   const center = lonLatToWorld(lon, lat);
   const seed = seedForLocation(pilot.seed, lat, lon);
@@ -163,6 +163,6 @@ export async function claimParcel(pilotId: string, lat: number, lon: number): Pr
 }
 
 export async function assertPilotOwnsParcel(pilotId: string, parcelId: string): Promise<void> {
-  const owned = await db.query.parcels.findFirst({ where: and(eq(parcels.id, parcelId), eq(parcels.pilotId, pilotId)) });
+  const owned = await db.query.parcels.findFirst({ where: { id: parcelId, pilotId } });
   if (!owned) throw new Error("Area not found for this pilot");
 }

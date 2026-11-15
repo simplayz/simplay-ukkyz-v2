@@ -1,0 +1,1100 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "id": "51de161a-dcf1-4b06-91e7-c8de52611849",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
+  "ddl": [
+    {
+      "name": "assaults",
+      "entityType": "tables"
+    },
+    {
+      "name": "bots",
+      "entityType": "tables"
+    },
+    {
+      "name": "buildings",
+      "entityType": "tables"
+    },
+    {
+      "name": "events",
+      "entityType": "tables"
+    },
+    {
+      "name": "parcels",
+      "entityType": "tables"
+    },
+    {
+      "name": "pilots",
+      "entityType": "tables"
+    },
+    {
+      "name": "rooms",
+      "entityType": "tables"
+    },
+    {
+      "name": "structures",
+      "entityType": "tables"
+    },
+    {
+      "name": "tile_cache",
+      "entityType": "tables"
+    },
+    {
+      "table": "assaults",
+      "name": "id",
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "assaults",
+      "name": "parcel_id",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "assaults",
+      "name": "report",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "assaults",
+      "name": "created_at",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "bots",
+      "name": "id",
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "bots",
+      "name": "pilot_id",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "bots",
+      "name": "role",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "bots",
+      "name": "name",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "bots",
+      "name": "provider",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "bots",
+      "name": "model",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "bots",
+      "name": "directive",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "bots",
+      "name": "autonomy",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "35",
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "bots",
+      "name": "active",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "true",
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "bots",
+      "name": "updated_at",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "buildings",
+      "name": "id",
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "buildings",
+      "name": "parcel_id",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "buildings",
+      "name": "structure_id",
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "buildings",
+      "name": "name",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "buildings",
+      "name": "archetype",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "buildings",
+      "name": "gx",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "buildings",
+      "name": "gy",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "buildings",
+      "name": "width",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "3",
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "buildings",
+      "name": "depth",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "3",
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "buildings",
+      "name": "level",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "1",
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "buildings",
+      "name": "created_at",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "events",
+      "name": "id",
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": true,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "events",
+      "name": "pilot_id",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "events",
+      "name": "kind",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "events",
+      "name": "message",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "events",
+      "name": "payload",
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "events",
+      "name": "created_at",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "parcels",
+      "name": "id",
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "parcels",
+      "name": "pilot_id",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "parcels",
+      "name": "name",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "parcels",
+      "name": "seed",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "parcels",
+      "name": "center_x",
+      "type": "real",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "parcels",
+      "name": "center_y",
+      "type": "real",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "parcels",
+      "name": "lat",
+      "type": "real",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "parcels",
+      "name": "lon",
+      "type": "real",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "parcels",
+      "name": "area_m2",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "parcels",
+      "name": "scores",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "parcels",
+      "name": "cells",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "parcels",
+      "name": "locked_until",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "parcels",
+      "name": "last_tick_at",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "parcels",
+      "name": "created_at",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "pilots",
+      "name": "id",
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "pilots",
+      "name": "call_sign",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "pilots",
+      "name": "seed",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "pilots",
+      "name": "home_lat",
+      "type": "real",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "pilots",
+      "name": "home_lon",
+      "type": "real",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "pilots",
+      "name": "credits",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "15000",
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "pilots",
+      "name": "created_at",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "rooms",
+      "name": "id",
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "rooms",
+      "name": "building_id",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "rooms",
+      "name": "kind",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "rooms",
+      "name": "name",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "rooms",
+      "name": "x",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "rooms",
+      "name": "y",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "rooms",
+      "name": "width",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "2",
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "rooms",
+      "name": "depth",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "2",
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "rooms",
+      "name": "staff",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "1",
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "rooms",
+      "name": "created_at",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "structures",
+      "name": "id",
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "structures",
+      "name": "parcel_id",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "structures",
+      "name": "type",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "structures",
+      "name": "gx",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "structures",
+      "name": "gy",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "structures",
+      "name": "rotation",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "0",
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "structures",
+      "name": "level",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "1",
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "structures",
+      "name": "created_at",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "tile_cache",
+      "name": "z",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "tile_cache",
+      "name": "x",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "tile_cache",
+      "name": "y",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "tile_cache",
+      "name": "png_base64",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "tile_cache",
+      "name": "fetched_at",
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "tile_cache",
+      "name": "source",
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "'osm'",
+      "generated": null,
+      "entityType": "columns"
+    },
+    {
+      "table": "bots",
+      "name": "bots_role_idx",
+      "columns": [
+        {
+          "value": "pilot_id",
+          "isExpression": false
+        },
+        {
+          "value": "role",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "entityType": "indexes"
+    },
+    {
+      "table": "events",
+      "name": "events_pilot_idx",
+      "columns": [
+        {
+          "value": "pilot_id",
+          "isExpression": false
+        },
+        {
+          "value": "id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "entityType": "indexes"
+    },
+    {
+      "table": "parcels",
+      "name": "parcels_lock_idx",
+      "columns": [
+        {
+          "value": "locked_until",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "entityType": "indexes"
+    },
+    {
+      "table": "structures",
+      "name": "structures_cell_idx",
+      "columns": [
+        {
+          "value": "parcel_id",
+          "isExpression": false
+        },
+        {
+          "value": "gx",
+          "isExpression": false
+        },
+        {
+          "value": "gy",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "entityType": "indexes"
+    },
+    {
+      "table": "assaults",
+      "name": "fk_assaults_parcel_id_parcels_id_fk",
+      "columns": [
+        "parcel_id"
+      ],
+      "tableTo": "parcels",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "entityType": "fks"
+    },
+    {
+      "table": "bots",
+      "name": "fk_bots_pilot_id_pilots_id_fk",
+      "columns": [
+        "pilot_id"
+      ],
+      "tableTo": "pilots",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "entityType": "fks"
+    },
+    {
+      "table": "buildings",
+      "name": "fk_buildings_parcel_id_parcels_id_fk",
+      "columns": [
+        "parcel_id"
+      ],
+      "tableTo": "parcels",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "entityType": "fks"
+    },
+    {
+      "table": "buildings",
+      "name": "fk_buildings_structure_id_structures_id_fk",
+      "columns": [
+        "structure_id"
+      ],
+      "tableTo": "structures",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "entityType": "fks"
+    },
+    {
+      "table": "events",
+      "name": "fk_events_pilot_id_pilots_id_fk",
+      "columns": [
+        "pilot_id"
+      ],
+      "tableTo": "pilots",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "entityType": "fks"
+    },
+    {
+      "table": "parcels",
+      "name": "fk_parcels_pilot_id_pilots_id_fk",
+      "columns": [
+        "pilot_id"
+      ],
+      "tableTo": "pilots",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "entityType": "fks"
+    },
+    {
+      "table": "rooms",
+      "name": "fk_rooms_building_id_buildings_id_fk",
+      "columns": [
+        "building_id"
+      ],
+      "tableTo": "buildings",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "entityType": "fks"
+    },
+    {
+      "table": "structures",
+      "name": "fk_structures_parcel_id_parcels_id_fk",
+      "columns": [
+        "parcel_id"
+      ],
+      "tableTo": "parcels",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "entityType": "fks"
+    },
+    {
+      "table": "tile_cache",
+      "name": "tile_cache_pk",
+      "columns": [
+        "z",
+        "x",
+        "y"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "table": "assaults",
+      "name": "assaults_pk",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "table": "bots",
+      "name": "bots_pk",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "table": "buildings",
+      "name": "buildings_pk",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "table": "events",
+      "name": "events_pk",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "table": "parcels",
+      "name": "parcels_pk",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "table": "pilots",
+      "name": "pilots_pk",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "table": "rooms",
+      "name": "rooms_pk",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "table": "structures",
+      "name": "structures_pk",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "table": "parcels",
+      "name": "parcels_pilot_id_unique",
+      "columns": [
+        "pilot_id"
+      ],
+      "nameExplicit": false,
+      "entityType": "uniques"
+    },
+    {
+      "table": "pilots",
+      "name": "pilots_call_sign_unique",
+      "columns": [
+        "call_sign"
+      ],
+      "nameExplicit": false,
+      "entityType": "uniques"
+    }
+  ],
+  "renames": []
+}
