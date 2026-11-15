@@ -1,4 +1,3 @@
-import { and, eq } from "drizzle-orm";
 import { databaseDriver, db } from "@/db";
 import { tileCache } from "@/db/schema";
 import { placeholderPng } from "@/server/placeholder";
@@ -38,7 +37,7 @@ export async function GET(_request: Request, context: { params: Promise<{ z: str
   }
   let cached: typeof tileCache.$inferSelect | undefined;
   try {
-    cached = await db.query.tileCache.findFirst({ where: and(eq(tileCache.z, z), eq(tileCache.x, x), eq(tileCache.y, y)) });
+    cached = await db.query.tileCache.findFirst({ where: { z, x, y } });
   } catch {
     cached = undefined;
   }

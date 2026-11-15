@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { defineRelations } from "drizzle-orm";
 import {
   bigserial,
   boolean,
@@ -144,24 +144,6 @@ const sqliteAssaults = sqliteTable("assaults", {
   createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 
-const sqlitePilotsRelations = relations(sqlitePilots, ({ one, many }) => ({
-  parcel: one(sqliteParcels),
-  bots: many(sqliteBots),
-  events: many(sqliteEvents),
-}));
-
-const sqliteParcelsRelations = relations(sqliteParcels, ({ one, many }) => ({
-  pilot: one(sqlitePilots, { fields: [sqliteParcels.pilotId], references: [sqlitePilots.id] }),
-  structures: many(sqliteStructures),
-  buildings: many(sqliteBuildings),
-  assaults: many(sqliteAssaults),
-}));
-
-const sqliteBuildingsRelations = relations(sqliteBuildings, ({ one, many }) => ({
-  parcel: one(sqliteParcels, { fields: [sqliteBuildings.parcelId], references: [sqliteParcels.id] }),
-  rooms: many(sqliteRooms),
-}));
-
 export const sqliteSchema = {
   pilots: sqlitePilots,
   parcels: sqliteParcels,
@@ -172,10 +154,25 @@ export const sqliteSchema = {
   tileCache: sqliteTileCache,
   events: sqliteEvents,
   assaults: sqliteAssaults,
-  pilotsRelations: sqlitePilotsRelations,
-  parcelsRelations: sqliteParcelsRelations,
-  buildingsRelations: sqliteBuildingsRelations,
 };
+
+export const sqliteRelations = defineRelations(sqliteSchema, (r) => ({
+  pilots: {
+    parcel: r.one.parcels({ from: r.pilots.id, to: r.parcels.pilotId }),
+    bots: r.many.bots({ from: r.pilots.id, to: r.bots.pilotId }),
+    events: r.many.events({ from: r.pilots.id, to: r.events.pilotId }),
+  },
+  parcels: {
+    pilot: r.one.pilots({ from: r.parcels.pilotId, to: r.pilots.id }),
+    structures: r.many.structures({ from: r.parcels.id, to: r.structures.parcelId }),
+    buildings: r.many.buildings({ from: r.parcels.id, to: r.buildings.parcelId }),
+    assaults: r.many.assaults({ from: r.parcels.id, to: r.assaults.parcelId }),
+  },
+  buildings: {
+    parcel: r.one.parcels({ from: r.buildings.parcelId, to: r.parcels.id }),
+    rooms: r.many.rooms({ from: r.buildings.id, to: r.rooms.buildingId }),
+  },
+}));
 
 const pgPilots = pgTable("pilots", {
   id: pgText("id").primaryKey(),
@@ -280,24 +277,6 @@ const pgAssaults = pgTable("assaults", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-const pgPilotsRelations = relations(pgPilots, ({ one, many }) => ({
-  parcel: one(pgParcels),
-  bots: many(pgBots),
-  events: many(pgEvents),
-}));
-
-const pgParcelsRelations = relations(pgParcels, ({ one, many }) => ({
-  pilot: one(pgPilots, { fields: [pgParcels.pilotId], references: [pgPilots.id] }),
-  structures: many(pgStructures),
-  buildings: many(pgBuildings),
-  assaults: many(pgAssaults),
-}));
-
-const pgBuildingsRelations = relations(pgBuildings, ({ one, many }) => ({
-  parcel: one(pgParcels, { fields: [pgBuildings.parcelId], references: [pgParcels.id] }),
-  rooms: many(pgRooms),
-}));
-
 export const pgSchema = {
   pilots: pgPilots,
   parcels: pgParcels,
@@ -308,10 +287,25 @@ export const pgSchema = {
   tileCache: pgTileCache,
   events: pgEvents,
   assaults: pgAssaults,
-  pilotsRelations: pgPilotsRelations,
-  parcelsRelations: pgParcelsRelations,
-  buildingsRelations: pgBuildingsRelations,
 };
+
+export const pgRelations = defineRelations(pgSchema, (r) => ({
+  pilots: {
+    parcel: r.one.parcels({ from: r.pilots.id, to: r.parcels.pilotId }),
+    bots: r.many.bots({ from: r.pilots.id, to: r.bots.pilotId }),
+    events: r.many.events({ from: r.pilots.id, to: r.events.pilotId }),
+  },
+  parcels: {
+    pilot: r.one.pilots({ from: r.parcels.pilotId, to: r.pilots.id }),
+    structures: r.many.structures({ from: r.parcels.id, to: r.structures.parcelId }),
+    buildings: r.many.buildings({ from: r.parcels.id, to: r.buildings.parcelId }),
+    assaults: r.many.assaults({ from: r.parcels.id, to: r.assaults.parcelId }),
+  },
+  buildings: {
+    parcel: r.one.parcels({ from: r.buildings.parcelId, to: r.parcels.id }),
+    rooms: r.many.rooms({ from: r.buildings.id, to: r.rooms.buildingId }),
+  },
+}));
 
 const activeSchema = (databaseDriver === "postgres" ? pgSchema : sqliteSchema) as typeof sqliteSchema;
 
@@ -324,7 +318,3 @@ export const bots = activeSchema.bots;
 export const tileCache = activeSchema.tileCache;
 export const events = activeSchema.events;
 export const assaults = activeSchema.assaults;
-
-export const pilotsRelations = activeSchema.pilotsRelations;
-export const parcelsRelations = activeSchema.parcelsRelations;
-export const buildingsRelations = activeSchema.buildingsRelations;

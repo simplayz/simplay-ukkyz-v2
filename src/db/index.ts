@@ -1,20 +1,21 @@
-import { mkdirSync } from "node:fs";
-import { dirname } from "node:path";
+import { existsSync, mkdirSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import Database from "better-sqlite3";
 import type { SQLWrapper } from "drizzle-orm";
 import { drizzle as drizzleSqlite, type BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
+import { migrate as migrateSqlite } from "drizzle-orm/better-sqlite3/migrator";
 import { drizzle as drizzlePg, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { databaseDriver, pgSchema, sqliteSchema, type DatabaseDriver } from "./schema";
+import { databaseDriver, pgRelations, sqliteRelations, type DatabaseDriver } from "./schema";
 
 export { databaseDriver, type DatabaseDriver };
 
-type SqliteDrizzleDb = BetterSQLite3Database<typeof sqliteSchema> & {
+type SqliteDrizzleDb = BetterSQLite3Database<typeof sqliteRelations> & {
   $client: Database.Database;
-  execute: <T = unknown>(query: SQLWrapper) => Promise<T[]>;
+  execute: <T extends Record<string, unknown> = Record<string, unknown>>(query: SQLWrapper) => Promise<T[]>;
 };
 
-type PgDrizzleDb = NodePgDatabase<typeof pgSchema> & {
+type PgDrizzleDb = NodePgDatabase<typeof pgRelations> & {
   $client: Pool;
 };
 
@@ -24,7 +25,7 @@ const globalForDb = globalThis as typeof globalThis & {
   __arenaNextJsSqlitePath?: string;
 };
 
-function resolveSqlitePath(): string {
+export function resolveSqlitePath(): string {
   const explicit = process.env.SQLITE_PATH?.trim();
   if (explicit) {
     return explicit.startsWith("file:") ? explicit.slice(5) : explicit;
@@ -158,6 +159,13 @@ function bootstrapSqliteSchema(client: Database.Database): void {
   `);
 }
 
+function hasSqliteTable(client: Database.Database, tableName: string): boolean {
+  const row = client
+    .prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1")
+    .get(tableName);
+  return row !== undefined;
+}
+
 function createSqliteDb(): { client: Database.Database; instance: SqliteDrizzleDb } {
   const sqlitePath = resolveSqlitePath();
   if (sqlitePath !== ":memory:") {
@@ -179,16 +187,26 @@ function createSqliteDb(): { client: Database.Database; instance: SqliteDrizzleD
   if (sqlitePath !== ":memory:") {
     client.pragma("journal_mode = WAL");
   }
-  bootstrapSqliteSchema(client);
+
+  const base = drizzleSqlite({ client, relations: sqliteRelations });
+  const migrationsFolder = resolve(process.cwd(), "drizzle");
+  const hasMigrationsTable = hasSqliteTable(client, "__drizzle_migrations");
+  const hasLegacyUntrackedTables = !hasMigrationsTable && hasSqliteTable(client, "pilots");
+
+  if (existsSync(migrationsFolder) && !hasLegacyUntrackedTables) {
+    migrateSqlite(base, { migrationsFolder });
+  } else {
+    bootstrapSqliteSchema(client);
+  }
 
   if (process.env.NODE_ENV !== "production") {
     globalForDb.__arenaNextJsSqliteClient = client;
     globalForDb.__arenaNextJsSqlitePath = sqlitePath;
   }
 
-  const base = drizzleSqlite(client, { schema: sqliteSchema });
   const instance = Object.assign(base, {
-    execute: async <T = unknown>(query: SQLWrapper): Promise<T[]> => base.all<T>(query),
+    execute: async <T extends Record<string, unknown> = Record<string, unknown>>(query: SQLWrapper): Promise<T[]> =>
+      base.all<T>(query),
   });
   return { client, instance };
 }
@@ -208,7 +226,7 @@ function createPostgresDb(): { pool: Pool; instance: PgDrizzleDb } {
     globalForDb.__arenaNextJsPostgresqlPool = pgPool;
   }
 
-  return { pool: pgPool, instance: drizzlePg(pgPool, { schema: pgSchema }) };
+  return { pool: pgPool, instance: drizzlePg({ client: pgPool, relations: pgRelations }) };
 }
 
 const initialized =
