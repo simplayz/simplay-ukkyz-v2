@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db";
-import { buildings, rooms, pilots, structures } from "@/db/schema";
+import { databaseDriver, db, pgDb } from "@/db";
+import { buildings, pgSchema, pilots, rooms, structures } from "@/db/schema";
 import { getStructureDefinition, isStructureType, type StructureType } from "@/engine/catalogue";
 import { PARCEL_GRID_SIZE } from "@/engine/geodesy";
 import { apiError, asRecord, finiteNumber } from "@/lib/api";
@@ -44,29 +44,57 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pi
       throw new Error("This cell lies inside an existing building footprint");
     }
 
+    const parcelId = snapshot.parcel.id;
+    const nextCredits = snapshot.pilot.credits - definition.cost;
+    const buildingName = `${definition.label} ${snapshot.buildings.length + 1}`;
     const structureId = crypto.randomUUID();
-    await db.transaction(async (tx) => {
-      await tx.insert(structures).values({ id: structureId, parcelId: snapshot.parcel!.id, type, gx, gy, rotation });
-      await tx.update(pilots).set({ credits: snapshot.pilot.credits - definition.cost }).where(eq(pilots.id, pilotId));
-      if (definition.site) {
-        const buildingId = crypto.randomUUID();
-        await tx.insert(buildings).values({
-          id: buildingId,
-          parcelId: snapshot.parcel!.id,
-          structureId,
-          name: `${definition.label} ${snapshot.buildings.length + 1}`,
-          archetype: type,
-          gx,
-          gy,
-          width: 3,
-          depth: 3,
-        });
-        await tx.insert(rooms).values([
-          { id: crypto.randomUUID(), buildingId, kind: "reception", name: "Reception", x: 0, y: 8, width: 4, depth: 4, staff: 1 },
-          { id: crypto.randomUUID(), buildingId, kind: "guard", name: "Guard Post", x: 8, y: 8, width: 4, depth: 4, staff: 1 },
-        ]);
-      }
-    });
+    if (databaseDriver === "postgres") {
+      await pgDb!.transaction(async (tx) => {
+        await tx.insert(pgSchema.structures).values({ id: structureId, parcelId, type, gx, gy, rotation });
+        await tx.update(pgSchema.pilots).set({ credits: nextCredits }).where(eq(pgSchema.pilots.id, pilotId));
+        if (definition.site) {
+          const buildingId = crypto.randomUUID();
+          await tx.insert(pgSchema.buildings).values({
+            id: buildingId,
+            parcelId,
+            structureId,
+            name: buildingName,
+            archetype: type,
+            gx,
+            gy,
+            width: 3,
+            depth: 3,
+          });
+          await tx.insert(pgSchema.rooms).values([
+            { id: crypto.randomUUID(), buildingId, kind: "reception", name: "Reception", x: 0, y: 8, width: 4, depth: 4, staff: 1 },
+            { id: crypto.randomUUID(), buildingId, kind: "guard", name: "Guard Post", x: 8, y: 8, width: 4, depth: 4, staff: 1 },
+          ]);
+        }
+      });
+    } else {
+      db.transaction((tx) => {
+        tx.insert(structures).values({ id: structureId, parcelId, type, gx, gy, rotation }).run();
+        tx.update(pilots).set({ credits: nextCredits }).where(eq(pilots.id, pilotId)).run();
+        if (definition.site) {
+          const buildingId = crypto.randomUUID();
+          tx.insert(buildings).values({
+            id: buildingId,
+            parcelId,
+            structureId,
+            name: buildingName,
+            archetype: type,
+            gx,
+            gy,
+            width: 3,
+            depth: 3,
+          }).run();
+          tx.insert(rooms).values([
+            { id: crypto.randomUUID(), buildingId, kind: "reception", name: "Reception", x: 0, y: 8, width: 4, depth: 4, staff: 1 },
+            { id: crypto.randomUUID(), buildingId, kind: "guard", name: "Guard Post", x: 8, y: 8, width: 4, depth: 4, staff: 1 },
+          ]).run();
+        }
+      });
+    }
     await publishEvent(pilotId, "build", `${definition.label} commissioned at grid ${gx + 1}:${gy + 1}.`, { structureId, gx, gy, type: body.type });
     const updated = await getWorldSnapshot(pilotId);
     return NextResponse.json(updated, { status: 201 });
