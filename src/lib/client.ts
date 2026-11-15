@@ -1,5 +1,6 @@
 "use client";
 
+import { api } from "./routes";
 import type { WorldSnapshot } from "./types";
 
 export async function apiRequest<T>(url: string, options?: RequestInit): Promise<T> {
@@ -14,7 +15,7 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
 }
 
 export async function fetchSnapshot(pilotId: string): Promise<WorldSnapshot> {
-  return apiRequest<WorldSnapshot>(`/api/pilots/${pilotId}`);
+  return apiRequest<WorldSnapshot>(api.pilot(pilotId));
 }
 
 export function formatNumber(value: number): string {

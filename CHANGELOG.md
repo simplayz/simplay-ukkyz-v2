@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased] - 2026-11-15
 
 ### Added
+- Centralized typed page and API route builders in `src/lib/routes.ts` (`pages.*` and `api.*`) and enabled `typedRoutes: true` in `next.config.ts`, replacing all hardcoded `/user/...` and `/api/...` URL templates across components, client helpers, hooks, and renderers.
 - Baseline SQLite migration (`drizzle/20261115081818_low_malice/migration.sql` and `snapshot.json`) generated with Drizzle Kit v1.0 RC folder-per-migration layout covering all 9 tables, foreign-key cascade constraints, and unique/composite indexes.
 - Driver-aware database migration runner (`src/db/migrate.ts`) supporting both SQLite (`drizzle-orm/better-sqlite3/migrator` with `PRAGMA foreign_keys = ON`, `WAL`, and `busy_timeout = 5000`) and PostgreSQL (`drizzle-orm/node-postgres/migrator` when `DATABASE_DRIVER=postgres`).
 - TypeScript Drizzle Kit config (`drizzle.config.ts`) respecting `DATABASE_DRIVER`, `SQLITE_PATH`, and `DATABASE_URL` on Node.js 22 ESM, alongside updated `drizzle.config.json` (`"out": "./drizzle"`).

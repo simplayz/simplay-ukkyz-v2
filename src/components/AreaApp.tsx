@@ -10,6 +10,7 @@ import { PlanCanvas } from "./PlanCanvas";
 import { STRUCTURE_CATALOGUE, getStructureDefinition, type StructureType } from "@/engine/catalogue";
 import { computeBuildingStats } from "@/engine/rooms";
 import { apiRequest, formatNumber } from "@/lib/client";
+import { api, pages } from "@/lib/routes";
 import type { WorldSnapshot } from "@/lib/types";
 import { useWorldConnection } from "@/hooks/useWorldConnection";
 import { useWorldStore } from "@/store/useWorldStore";
@@ -30,7 +31,7 @@ export function AreaApp({ userId, areaId }: { userId: string; areaId: string }) 
   }, [snapshot, selectedBuildingId]);
 
   if (loading && !snapshot) return <><AppHeader active="area" /><div className="loading-screen">Loading frozen area survey…</div></>;
-  if (!snapshot?.parcel || snapshot.parcel.id !== areaId) return <><AppHeader pilotId={userId} active="area" /><div className="empty-state">{error ?? "This area does not belong to the requested pilot."}<div className="mt-4"><Link className="button" href="/">Return to world</Link></div></div></>;
+  if (!snapshot?.parcel || snapshot.parcel.id !== areaId) return <><AppHeader pilotId={userId} active="area" /><div className="empty-state">{error ?? "This area does not belong to the requested pilot."}<div className="mt-4"><Link className="button" href={pages.world()}>Return to world</Link></div></div></>;
   const parcel = snapshot.parcel;
   const selectedBuilding = snapshot.buildings.find((building) => building.id === selectedBuildingId) ?? null;
   const selectedStats = selectedBuilding ? computeBuildingStats(selectedBuilding.rooms) : null;
@@ -40,7 +41,7 @@ export function AreaApp({ userId, areaId }: { userId: string; areaId: string }) 
     if (!selectedBuild || busy) return;
     setBusy(true);
     try {
-      const next = await apiRequest<WorldSnapshot>(`/api/pilots/${userId}/structures`, { method: "POST", body: JSON.stringify({ type: selectedBuild, gx: cell.x, gy: cell.y, rotation: 0 }) });
+      const next = await apiRequest<WorldSnapshot>(api.pilotStructures(userId), { method: "POST", body: JSON.stringify({ type: selectedBuild, gx: cell.x, gy: cell.y, rotation: 0 }) });
       setSnapshot(next);
       const created = next.structures.find((structure) => structure.gx === cell.x && structure.gy === cell.y && structure.type === selectedBuild);
       const building = next.buildings.find((entry) => entry.structureId === created?.id);
@@ -54,10 +55,10 @@ export function AreaApp({ userId, areaId }: { userId: string; areaId: string }) 
     <main className="page-shell">
       <AppHeader pilotId={userId} areaId={areaId} buildingId={selectedBuildingId ?? snapshot.buildings[0]?.id} active="area" />
       <div className="page-main">
-        <div className="breadcrumbs"><Link href="/"><ArrowLeft size={12} />World</Link><span>/</span><span>{snapshot.pilot.callSign}</span><span>/</span><span>{parcel.name}</span></div>
+        <div className="breadcrumbs"><Link href={pages.world()}><ArrowLeft size={12} />World</Link><span>/</span><span>{snapshot.pilot.callSign}</span><span>/</span><span>{parcel.name}</span></div>
         <div className="page-title">
           <div><div className="eyebrow">Player area / 40,960,000 m²</div><h1>{parcel.name}</h1><p>{snapshot.buildings.length} building sites · {snapshot.structures.length} total structures · seed <span className="mono">{parcel.seed}</span></p></div>
-          <div className="hud-actions"><span className="button ghost"><Coins size={15} />{formatNumber(snapshot.pilot.credits)}</span><Link className="button" href={`/user/${userId}/ai/management`}><Bot size={14} />Manage officers</Link></div>
+          <div className="hud-actions"><span className="button ghost"><Coins size={15} />{formatNumber(snapshot.pilot.credits)}</span><Link className="button" href={pages.aiManagement(userId)}><Bot size={14} />Manage officers</Link></div>
         </div>
 
         <div className="dashboard-grid three">
@@ -72,7 +73,7 @@ export function AreaApp({ userId, areaId }: { userId: string; areaId: string }) 
                 const stats = computeBuildingStats(building.rooms);
                 return <div className={`building-row ${selectedBuildingId === building.id ? "border-accent" : ""}`} key={building.id}>
                   <button className="text-left flex-1 cursor-pointer border-0 bg-transparent" onClick={() => setSelectedBuildingId(building.id)}><strong className="block text-xs">{building.name}</strong><span className="tiny muted">{building.rooms.length} rooms · {stats.staff} staff · grid {building.gx + 1}:{building.gy + 1}</span></button>
-                  <Link className="button icon" href={`/user/${userId}/area/${areaId}/building/${building.id}`} aria-label={`Open ${building.name}`}><ArrowRight size={14} /></Link>
+                  <Link className="button icon" href={pages.building(userId, areaId, building.id)} aria-label={`Open ${building.name}`}><ArrowRight size={14} /></Link>
                 </div>;
               })}</div> : <div className="empty-state">No building sites yet. Select a civic or production site and click the layout.</div>}
             </section>
@@ -102,7 +103,7 @@ export function AreaApp({ userId, areaId }: { userId: string; areaId: string }) 
                 <p className="tiny muted">{getStructureDefinition(selectedBuilding.archetype).description}</p>
                 <div className="metric-grid mt-3"><div className="metric"><span>Rooms</span><strong>{selectedBuilding.rooms.length}</strong></div><div className="metric"><span>Staff</span><strong>{selectedStats.staff}</strong></div><div className="metric"><span>Coverage</span><strong>{selectedStats.coverage}%</strong></div></div>
                 <div className="flex gap-4 mt-3 tiny muted"><span className="flex items-center gap-1"><ShieldCheck size={13} />{selectedStats.guards} guard</span><span className="flex items-center gap-1"><Users size={13} />{selectedStats.receptionists} receptionist</span></div>
-                <Link className="button primary w-full mt-4" href={`/user/${userId}/area/${areaId}/building/${selectedBuilding.id}`}>Open building site<ArrowRight size={14} /></Link>
+                <Link className="button primary w-full mt-4" href={pages.building(userId, areaId, selectedBuilding.id)}>Open building site<ArrowRight size={14} /></Link>
               </section>
             ) : <section className="glass-panel empty-state">Select a 3D mass or register entry to inspect its staffed interior.</section>}
             <section className="glass-panel panel-pad"><div className="eyebrow">Live operations</div><div className="event-log">{snapshot.events.slice(-5).reverse().map((event) => <div className="event-row" key={event.id}><time>{new Date(event.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</time><span>{event.message}</span></div>)}</div></section>
